@@ -61,7 +61,7 @@ const LANG = {
     heroCTA: "Explore Species",
     print: "Print / Export",
     language: "ภาษาไทย",
-    aiHint: "This is a placeholder chat UI. We can hook this to Dialogflow or Gemini later.",
+    aiHint: "If you have any questions or need any help, please feel free to ask.",
     startChat: "Start a conversation",
     beginnerMode: "Beginner Mode",
     beginnerNote: "Hides advanced/Old World and shows safety tips.",
@@ -314,7 +314,7 @@ const LANG = {
     heroCTA: "ดูสายพันธุ์",
     print: "พิมพ์ / ส่งออก",
     language: "English",
-    aiHint: "นี่คือ UI ตัวอย่างของแชท เดี๋ยวเชื่อม Dialogflow หรือ Gemini ให้ภายหลังได้",
+    aiHint: "มีอะไรสงสัยหรืออยากให้ช่วยเหลืออะไรสามารถถามมาได้เลย",
     startChat: "เริ่มสนทนา",
     beginnerMode: "โหมดมือใหม่",
     beginnerNote: "ซ่อนสายพันธุ์ขั้นสูง/โลกเก่า และแสดงคำเตือนความปลอดภัย",
@@ -1653,6 +1653,9 @@ function Knowledge({ t }) {
 // ------------------------
 // AI Consultation (Gemini-connected)
 // ------------------------
+// ------------------------
+// AI Consultation (Gemini-connected, fixed 400)
+// ------------------------
 function AIConsult({ t }) {
   const STORAGE_KEY = "tc_ai_messages_v1";
   const [messages, setMessages] = React.useState(() => {
@@ -1676,7 +1679,6 @@ function AIConsult({ t }) {
     const prompt = input.trim();
     if (!prompt || loading) return;
 
-    // แนะนำรูปแบบคำตอบเล็กน้อย
     const formatHint =
       "โปรดตอบแบบกระชับและอ่านง่าย: ใช้ bullet 3–6 ข้อ หรือย่อหน้าสั้น ๆ ขึ้นบรรทัดใหม่ให้ชัดเจน";
     const finalPrompt = `${formatHint}\n\n${prompt}`;
@@ -1695,8 +1697,9 @@ function AIConsult({ t }) {
       return;
     }
 
+    // ✅ ใช้โมเดลล่าสุด และเพิ่ม role:"user"
     const endpoint =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
       apiKey;
 
     try {
@@ -1704,20 +1707,32 @@ function AIConsult({ t }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: finalPrompt }] }],
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: finalPrompt }],
+            },
+          ],
         }),
       });
 
       const data = await r.json();
       console.log("Gemini raw:", data);
 
-      const text =
-        data?.candidates?.[0]?.content?.parts
-          ?.map((p) => p?.text || "")
-          .join("\n")
-          .trim() || "(no reply)";
-
-      setMessages((m) => [...m, { role: "assistant", text }]);
+      // ถ้ามี error จาก API ให้โชว์ข้อความชัด ๆ
+      if (data?.error?.message) {
+        setMessages((m) => [
+          ...m,
+          { role: "assistant", text: `Error: ${data.error.message}` },
+        ]);
+      } else {
+        const text =
+          data?.candidates?.[0]?.content?.parts
+            ?.map((p) => p?.text || "")
+            .join("\n")
+            .trim() || "(no reply)";
+        setMessages((m) => [...m, { role: "assistant", text }]);
+      }
     } catch (e) {
       setMessages((m) => [
         ...m,
