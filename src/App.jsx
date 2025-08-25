@@ -1651,11 +1651,11 @@ function Knowledge({ t }) {
 
 
 // ------------------------
-// AI Consultation (placeholder UI)
+// AI Consultation (Gemini-connected)
 // ------------------------
 function AIConsult({ t }) {
   const STORAGE_KEY = "tc_ai_messages_v1";
-  const [messages, setMessages] = useState(() => {
+  const [messages, setMessages] = React.useState(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const arr = raw ? JSON.parse(raw) : null;
@@ -1663,10 +1663,10 @@ function AIConsult({ t }) {
     } catch {}
     return [{ role: "system", text: t.aiHint }];
   });
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [input, setInput] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-200)));
     } catch {}
@@ -1674,33 +1674,54 @@ function AIConsult({ t }) {
 
   const send = async () => {
     const prompt = input.trim();
-    if (!prompt) return;
+    if (!prompt || loading) return;
 
-    // บอกสไตล์คำตอบให้จัดเป็นบูลเล็ต/ย่อหน้าและขึ้นบรรทัดใหม่
+    // แนะนำรูปแบบคำตอบเล็กน้อย
     const formatHint =
-      "โปรดตอบแบบกระชับและอ่านง่าย: ใช้ bullet 3–6 ข้อ หรือย่อหน้าสั้น ๆ " +
-      "ขึ้นบรรทัดใหม่ให้ชัดเจน ไม่ต้องเกริ่นนำและไม่ต้องลงท้ายสุภาพ";
+      "โปรดตอบแบบกระชับและอ่านง่าย: ใช้ bullet 3–6 ข้อ หรือย่อหน้าสั้น ๆ ขึ้นบรรทัดใหม่ให้ชัดเจน";
     const finalPrompt = `${formatHint}\n\n${prompt}`;
 
     setMessages((m) => [...m, { role: "user", text: prompt }]);
     setInput("");
     setLoading(true);
 
-    try {
-      const r = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: finalPrompt }),
-      });
-      const data = await r.json();
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
       setMessages((m) => [
         ...m,
-        { role: "assistant", text: data.text ?? "(no reply)" },
+        { role: "assistant", text: "ยังไม่พบ VITE_GEMINI_API_KEY ใน Environment" },
       ]);
+      setLoading(false);
+      return;
+    }
+
+    const endpoint =
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" +
+      apiKey;
+
+    try {
+      const r = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: finalPrompt }] }],
+        }),
+      });
+
+      const data = await r.json();
+      console.log("Gemini raw:", data);
+
+      const text =
+        data?.candidates?.[0]?.content?.parts
+          ?.map((p) => p?.text || "")
+          .join("\n")
+          .trim() || "(no reply)";
+
+      setMessages((m) => [...m, { role: "assistant", text }]);
     } catch (e) {
       setMessages((m) => [
         ...m,
-        { role: "assistant", text: "(error) " + (e?.message || e) },
+        { role: "assistant", text: "(error) " + (e?.message || String(e)) },
       ]);
     } finally {
       setLoading(false);
@@ -1740,10 +1761,10 @@ function AIConsult({ t }) {
       <div className="p-3 border-t border-zinc-200 flex items-center gap-2">
         <textarea
           value={input}
-          onChange={(e)=>setInput(e.target.value)}
-          onKeyDown={(e)=>{
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();  // ไม่ให้ขึ้นบรรทัดใหม่
+              e.preventDefault();
               send();
             }
           }}
@@ -1751,10 +1772,10 @@ function AIConsult({ t }) {
           className="flex-1 px-3 py-2 rounded-xl border border-zinc-300 resize-none"
           placeholder={t.startChat}
         />
-
         <button
           onClick={send}
-          className="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+          disabled={loading}
+          className="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
         >
           Send
         </button>
