@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Globe, Bot, BookOpen, Layers, Home, ChevronRight, ChevronDown, Bug, SlidersHorizontal, ShieldAlert, CheckCircle2, X, RefreshCw } from "lucide-react";
+import { Search, Globe, Bot, BookOpen, Layers, Home, ChevronRight, ChevronDown, Bug, SlidersHorizontal, ShieldAlert, CheckCircle2, X, RefreshCw, Wrench, Stethoscope, ZoomIn } from "lucide-react";
 import './index.css'
 
 
@@ -30,7 +30,7 @@ const LANG = {
   en: {
     appName: "TaraCare",
     tagline: "Less risk, more joy.",
-    nav: { home: "Home", care: "Care Guide", species: "Species", knowledge: "Knowledge", ai: "AI Consultation" },
+    nav: { home: "Home", care: "Care Guide", species: "Species", knowledge: "Knowledge", ai: "AI Consultation", diseases: "Common Issues", troubleshoot: "Troubleshooting" },
     search: "Search species…",
     filters: "Filters",
     clearAll: "Clear all",
@@ -278,6 +278,131 @@ const LANG = {
     If things go wrong
     • Partial “stuck molt”: increase localized humidity and monitor closely
     • Avoid pulling/peeling; if severe, seek advice from an experienced keeper`
+    },
+
+    {
+      id: "dehydration-overheat",
+      type: "troubleshoot",
+      severity: "danger",
+      q: "Dehydration/Overheat (lethargic, wrinkly abdomen, legs curling)",
+      checks: [
+        "Empty water dish / no moist corner",
+        "High ambient temp (~>28–30°C) or direct sun/warm airflow",
+        "Stale air, poor cross-ventilation"
+      ],
+      fixes: [
+        "Provide fresh water + one small moist spot (don’t soak the whole tank)",
+        "Move away from heat/sun; increase airflow",
+        "Stop feeding; keep quiet and monitor"
+      ],
+      prevent: [
+        "Water dish at all times; refresh regularly",
+        "Avoid window sun/heaters and hot drafts",
+        "Stay within species temperature range"
+      ],
+      related: ["humidity-ventilation","feeding-schedule"]
+    },
+    {
+      id: "stuck-molt",
+      type: "troubleshoot",
+      severity: "danger",
+      q: "Stuck molt: what to do",
+      checks: [
+        "Pieces of exuviae stuck on legs/abdomen",
+        "Low humidity or feeder insects left inside"
+      ],
+      fixes: [
+        "Do NOT pull/peel the exuviae",
+        "Increase localized humidity (mist wall/substrate nearby, never on the spider)",
+        "Remove all feeders and observe quietly"
+      ],
+      prevent: [
+        "Slightly higher humidity premolt–postmolt with good airflow",
+        "At premolt signs → remove feeders and reduce disturbance"
+      ],
+      related: ["molting-aftercare","humidity-ventilation"]
+    },
+    {
+      id: "mold-mites",
+      type: "troubleshoot",
+      severity: "caution",
+      q: "Mold / clean-up mites",
+      checks: [
+        "White fuzz on leftovers/substrate",
+        "Tiny moving dots + musty smell"
+      ],
+      fixes: [
+        "Remove leftovers within 24h",
+        "Improve ventilation; reduce watering/misting",
+        "Replace part (or all) of the substrate if severe"
+      ],
+      prevent: [
+        "Right-size feeding, avoid many feeders at once",
+        "Clean water dish regularly; keep airflow",
+        "Use clean/quarantined feeders"
+      ],
+      related: ["feeding-by-stage","feeding-schedule","humidity-ventilation"]
+    },
+    {
+      id: "injury-bleeding",
+      type: "troubleshoot",
+      severity: "danger",
+      q: "Injury/bleeding after a fall",
+      checks: [
+        "Clear hemolymph seeping/bleeding",
+        "Abnormal gait / cracked exoskeleton / broken leg"
+      ],
+      fixes: [
+        "Dab with cornstarch/baby powder to stop bleeding",
+        "Lower heights; pad/arrange decor for safety",
+        "No feeding for 48–72h; reassess"
+      ],
+      prevent: [
+        "Limit height for terrestrials; add cork bark anchors",
+        "No recreational handling; work low",
+        "Check lid and escape gaps every time"
+      ],
+      related: ["handling"]
+    },
+    {
+      id: "escape-handling",
+      type: "troubleshoot",
+      severity: "caution",
+      q: "Escape recovery: safe recapture",
+      checks: [
+        "Close doors/windows and floor gaps",
+        "Search dark edges: wall bases, under furniture/behind curtains"
+      ],
+      fixes: [
+        "Use a clear cup + stiff card; guide into a tub",
+        "Work slowly; dim lights/turn off fans; use red light",
+        "Do not grab/squeeze with hands or tongs"
+      ],
+      prevent: [
+        "Check lid/locks; vent holes must be small enough",
+        "Work on wide/low surfaces; have a spare tub ready",
+        "Do rehousing at calm evening hours"
+      ],
+      related: ["handling","rehousing"]
+    },
+    {
+      id: "humidity-issues",
+      type: "troubleshoot",
+      severity: "info",
+      q: "Too wet / too dry: quick fixes",
+      checks: [
+        "Too wet: condensation across glass, musty smell",
+        "Too dry: crumbly substrate, wrinkly abdomen, frequent drinking"
+      ],
+      fixes: [
+        "Too wet → add vents / crack lid briefly; reduce watering",
+        "Too dry → water one ‘moist corner’ or lightly mist substrate"
+      ],
+      prevent: [
+        "Follow species humidity range + ensure cross-ventilation",
+        "Prefer water dish over misting the entire tank; use a hygrometer"
+      ],
+      related: ["humidity-ventilation"]
     }
   ],
     recommend: "Recommended for beginners",
@@ -286,7 +411,7 @@ const LANG = {
   th: {
     appName: "TaraCare",
     tagline: "ลดความเสี่ยง เพิ่มความสุข",
-    nav: { home: "หน้าแรก", care: "คู่มือการเลี้ยง", species: "สายพันธุ์", knowledge: "ความรู้ทั่วไป", ai: "AI ช่วยเหลือ" },
+    nav: { home: "หน้าแรก", care: "คู่มือการเลี้ยง", species: "สายพันธุ์", knowledge: "ความรู้ทั่วไป", ai: "AI ช่วยเหลือ", diseases: "โรคที่พบบ่อย", troubleshoot: "แก้ปัญหาเบื้องต้น" },
     search: "ค้นหาสายพันธุ์…",
     filters: "ตัวกรอง",
     clearAll: "ล้างทั้งหมด",
@@ -533,6 +658,131 @@ const LANG = {
       กรณีฉุกเฉินเบื้องต้น
       • ติดลอก (stuck molt) บางส่วน: เพิ่มความชื้นเฉพาะจุดและเฝ้าดูใกล้ชิด
       • หลีกเลี่ยงการดึง/แงะเอง หากรุนแรงให้ขอคำแนะนำจากผู้มีประสบการณ์`
+      },
+
+      {
+        id: "dehydration-overheat",
+        type: "troubleshoot",
+        severity: "danger",
+        q: "ขาดน้ำ/ร้อนเกิน (ซบ ท้องย่น ขางอเข้า)",
+        checks: [
+          "ถ้วยน้ำแห้ง/ไม่มีมุมชื้น",
+          "อุณหภูมิสูงเกิน (~>28–30°C) หรือโดนแดด/ลมร้อน",
+          "อากาศอับ ระบายไม่ดี"
+        ],
+        fixes: [
+          "เติมน้ำทันที + ทำมุมชื้น 1 จุด (ไม่ต้องชุ่มทั้งตู้)",
+          "ย้ายพ้นแดด/แหล่งความร้อน เปิดทางลม",
+          "งดให้อาหาร ให้สงบและสังเกตอาการ"
+        ],
+        prevent: [
+          "มีถ้วยน้ำตลอด ล้าง/เติมสม่ำเสมอ",
+          "ไม่วางใกล้หน้าต่างแดดจัด/ฮีตเตอร์",
+          "ยึดช่วงอุณหภูมิของสายพันธุ์"
+        ],
+        related: ["humidity-ventilation","feeding-schedule"]
+      },
+      {
+        id: "stuck-molt",
+        type: "troubleshoot",
+        severity: "danger",
+        q: "ลอกคราบติด (Stuck molt): ทำยังไง",
+        checks: [
+          "เห็นชิ้นคราบติดตามขา/ท้อง",
+          "ความชื้นต่ำหรือมีเหยื่อค้างในตู้"
+        ],
+        fixes: [
+          "ห้ามดึง/แงะคราบออกเอง",
+          "เพิ่มความชื้นเฉพาะจุด (พรมน้ำที่ผนัง/พื้นใกล้ ๆ ไม่พ่นโดนตัว)",
+          "เอาเหยื่อออกทั้งหมดและเฝ้าดู"
+        ],
+        prevent: [
+          "ช่วง premolt–postmolt เพิ่มชื้นเล็กน้อยและลมผ่านดี",
+          "เห็นสัญญาณ premolt → เอาเหยื่อออกและลดการรบกวน"
+        ],
+        related: ["molting-aftercare","humidity-ventilation"]
+      },
+      {
+        id: "mold-mites",
+        type: "troubleshoot",
+        severity: "caution",
+        q: "เชื้อรา/ไรกินซากในตู้",
+        checks: [
+          "มีฝ้าขาวบนซากอาหาร/พื้น",
+          "เห็นจุดเล็กเคลื่อนที่ (ไร) + กลิ่นอับ"
+        ],
+        fixes: [
+          "เก็บซาก/เศษอาหารใน 24 ชม.",
+          "เพิ่มการระบายอากาศ ลดการรดน้ำ/พ่น",
+          "เปลี่ยนวัสดุรองพื้นบางส่วน (หรือทั้งตู้ถ้าหนัก)"
+        ],
+        prevent: [
+          "ให้อาหารพอดีตัว ไม่ปล่อยหลายชิ้นพร้อมกัน",
+          "ล้างถ้วยน้ำประจำ และให้ลมผ่านดี",
+          "ใช้เหยื่อสะอาด/กักกันก่อนใช้"
+        ],
+        related: ["feeding-by-stage","feeding-schedule","humidity-ventilation"]
+      },
+      {
+        id: "injury-bleeding",
+        type: "troubleshoot",
+        severity: "danger",
+        q: "บาดเจ็บ/เลือดไหลหลังตกกระแทก",
+        checks: [
+          "มีของเหลวใส (ฮีโมลิมฟ์) ซึมหรือไหล",
+          "เดินผิดปกติ/เกราะแตก/ขาหัก"
+        ],
+        fixes: [
+          "แต้มแป้งข้าวโพด/แป้งเด็กบาง ๆ เพื่อห้ามเลือด",
+          "ลดความสูง/ปรับของในตู้ให้นิ่มและปลอดภัย",
+          "งดให้อาหาร 48–72 ชม. แล้วประเมินอีกครั้ง"
+        ],
+        prevent: [
+          "จำกัดความสูงในตู้สายดิน, ใส่คอร์กบาร์กยึดเกาะ",
+          "ไม่จับเล่น ทำงานใกล้พื้น",
+          "ตรวจฝา/ช่องหนีให้แน่นเสมอ"
+        ],
+        related: ["handling"]
+      },
+      {
+        id: "escape-handling",
+        type: "troubleshoot",
+        severity: "caution",
+        q: "หนีหลุด: จับกลับยังไงให้ปลอดภัย",
+        checks: [
+          "ปิดประตู/หน้าต่างและช่องใต้ประตู",
+          "ค้นหามุมมืด ขอบผนัง ใต้เฟอร์นิเจอร์"
+        ],
+        fixes: [
+          "ใช้แก้วใส + การ์ดแข็ง (catch-cup) ไล่ให้เดินเข้ากระปุก",
+          "ทำงานช้า ๆ ลดแสง/ปิดพัดลม ใช้ไฟแดงช่วยส่อง",
+          "ไม่ใช้มือเปล่าคว้าหรือบีบคีบ"
+        ],
+        prevent: [
+          "เช็กฝาและตัวล็อกทุกครั้ง รูระบายต้องเล็กพอ",
+          "ทำงานบนพื้นที่กว้าง/ใกล้พื้น มีกล่องสำรอง",
+          "ย้ายตู้ช่วงค่ำที่เงียบ"
+        ],
+        related: ["handling","rehousing"]
+      },
+      {
+        id: "humidity-issues",
+        type: "troubleshoot",
+        severity: "info",
+        q: "ตู้แฉะเกิน/แห้งเกิน แก้ยังไงดี",
+        checks: [
+          "แฉะเกิน: ไอน้ำเกาะกระจกทั้งบาน/กลิ่นอับ",
+          "แห้งเกิน: พื้นร่วน/ผิวท้องย่น/ดื่มน้ำบ่อย"
+        ],
+        fixes: [
+          "แฉะเกิน → เพิ่มรู/เปิดฝาชั่วคราว ลดการรดน้ำ",
+          "แห้งเกิน → รดน้ำ ‘มุมชื้น’ 1 จุด หรือพรมน้ำพื้นเบา ๆ"
+        ],
+        prevent: [
+          "ยึดช่วงความชื้นของสปีชีส์ + ลมไหลเวียนดี",
+          "ใช้ถ้วยน้ำแทนการพ่นทั้งตู้ และวางไฮโกรมิเตอร์ช่วย"
+        ],
+        related: ["humidity-ventilation"]
       }
     ],
     
@@ -550,6 +800,12 @@ const KNOWLEDGE_IMAGES = {
   "feeding-schedule": "/knowledge/feeding-schedule.jpg",
   "molting-aftercare": "/knowledge/molting-aftercare.jpg",
   "health-common": "/knowledge/health-common.jpg",
+  "dehydration-overheat": "/knowledge/dehydration-overheat.jpg",
+  "stuck-molt": "/knowledge/stuck-molt.jpg",
+  "mold-mites": "/knowledge/mold-mites.jpg",
+  "injury-bleeding": "/knowledge/injury-bleeding.jpg",
+  "escape-handling": "/knowledge/escape-handling.jpg",
+  "humidity-issues": "/knowledge/humidity-issues.jpg",
 };
 
 // ------------------------
@@ -632,7 +888,7 @@ function runSmokeTests() {
 export default function App() {
   // 1) ประกาศ state ให้ครบ ก่อนมี useEffect ใด ๆ
   const [page, setPage] = useState(() => {
-    const allowed = new Set(["home", "care", "species", "knowledge", "ai"]);
+    const allowed = new Set(["home", "care", "species", "knowledge", "ai", "diseases", "troubleshoot"]);
     const fromHash = window.location.hash.replace("#", "");
     if (allowed.has(fromHash)) return fromHash;
     const saved = localStorage.getItem("tc_page");
@@ -740,6 +996,8 @@ export default function App() {
               <NavItem id="species" icon={Layers} label={t.nav.species} />
               <NavItem id="knowledge" icon={Globe} label={t.nav.knowledge} />
               <NavItem id="ai" icon={Bot} label={t.nav.ai} />
+              <NavItem id="diseases"    icon={Stethoscope}  label={t.nav.diseases} />
+              <NavItem id="troubleshoot"icon={Wrench}       label={t.nav.troubleshoot} />
             </div>
           </nav>
 
@@ -785,6 +1043,16 @@ export default function App() {
                 <AIConsult t={t} lang={lang} />
               </motion.section>
             )}
+            {page === "diseases" && (
+              <motion.section key="diseases" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}} transition={{duration:0.2}}>
+                <DiseasesGuide t={t} lang={lang} />
+              </motion.section>
+            )}
+            {page === "troubleshoot" && (
+              <motion.section key="troubleshoot" initial={{opacity:0,y:8}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-8}} transition={{duration:0.2}}>
+                <TroubleshootGuide t={t} lang={lang} />
+              </motion.section>
+            )}
           </AnimatePresence>
         </main>
       </div>
@@ -793,6 +1061,201 @@ export default function App() {
       <footer className="py-10 text-center text-xs text-zinc-500">© {new Date().getFullYear()} TaraCare • UX prototype for thesis</footer>
       <style>{mounted ? "" : "*{transition:none!important}"}</style>
     </div>
+  );
+}
+
+function DiseasesGuide({ t, lang }) {
+  const item = (t.knowledge || []).find(it => it.id === "health-common");
+  if (!item) return <div className="text-sm text-zinc-500">No content</div>;
+  const img = resolveKnowledgeImg(item);
+
+  return (
+    <article className="space-y-4">
+      <header className="flex items-center gap-2">
+        <Stethoscope className="w-5 h-5" />
+        <h2 className="text-xl font-bold">
+          {lang === "th" ? "โรค/ปัญหาที่พบบ่อย" : "Common Issues & Prevention"}
+        </h2>
+      </header>
+
+      <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+        {img && (
+          <div className="relative aspect-[16/9] bg-zinc-100">
+            <img src={img} alt={item.q} className="absolute inset-0 w-full h-full object-cover" />
+          </div>
+        )}
+        <div className="p-4">
+          <div className="font-semibold mb-2">{item.q}</div>
+          <div className="text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed">
+            {item.a}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function TroubleshootGuide({ t, lang }) {
+  const labels = lang === "th"
+    ? { title: "แก้ปัญหาเบื้องต้น", checks: "ตรวจเช็ก", fixes: "วิธีแก้", prevent: "ป้องกัน", zoom: "ขยาย",
+        sev: { danger: "ฉุกเฉิน", caution: "ควรระวัง", info: "ข้อมูล" } }
+    : { title: "Troubleshooting", checks: "Checks", fixes: "Fixes", prevent: "Prevention", zoom: "Zoom",
+        sev: { danger: "Danger", caution: "Caution", info: "Info" } };
+
+  const all = (t.knowledge || []);
+  const typed = all.filter(it => it.type === "troubleshoot");
+  const fallbackIds = ["not-eating", "molting-aftercare"];
+  const fallback = all.filter(it => fallbackIds.includes(it.id));
+  const items = (typed.length ? typed : fallback).map(it => ({ ...it, img: resolveKnowledgeImg(it) }));
+
+  if (!items.length) return <div className="text-sm text-zinc-500">No content</div>;
+
+  const sevOrder = { danger: 0, caution: 1, info: 2 };
+  items.sort((a, b) =>
+    (sevOrder[(a.severity || "info")] - sevOrder[(b.severity || "info")]) ||
+    String(a.q).localeCompare(String(b.q))
+  );
+
+  const sevTheme = {
+    danger: "bg-red-50 border-red-200 text-red-800",
+    caution: "bg-amber-50 border-amber-200 text-amber-800",
+    info: "bg-sky-50 border-sky-200 text-sky-800",
+  };
+
+  // ป้ายหัวข้อสั้นบนภาพ (ถ้าอยากตั้งเองต่อไอเท็ม ให้เพิ่ม shortTh/shortEn ใน knowledge ได้)
+  const shortLabel = (it) => {
+    if (lang === "th") {
+      if (it.shortTh) return it.shortTh;
+      if (it.id === "not-eating") return "ไม่กินอาหาร";
+      if (it.id === "molting-aftercare") return "หลังลอกคราบ";
+      if (it.id === "dehydration-overheat") return "ขาดน้ำ/ร้อนเกิน";
+      return it.q;
+    }
+    if (it.shortEn) return it.shortEn;
+    if (it.id === "not-eating") return "Not eating";
+    if (it.id === "molting-aftercare") return "Post-molt care";
+    if (it.id === "dehydration-overheat") return "Dehydration / Overheat";
+    return it.q;
+  };
+
+  const SectionList = ({ icon: Icon, title, items }) => (
+    <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+      <div className="flex items-center gap-2 font-medium mb-2">
+        <Icon className="w-4 h-4" /> <span>{title}</span>
+      </div>
+      {Array.isArray(items) && items.length ? (
+        <ul className="list-disc pl-5 space-y-1 text-sm text-zinc-700">
+          {items.map((li, i) => <li key={i}>{li}</li>)}
+        </ul>
+      ) : (
+        <div className="text-sm text-zinc-500">—</div>
+      )}
+    </div>
+  );
+
+  const [zoom, setZoom] = React.useState(null);
+
+  return (
+    <article className="space-y-4">
+      <header className="flex items-center gap-2">
+        <Wrench className="w-5 h-5" />
+        <h2 className="text-xl font-bold">{labels.title}</h2>
+      </header>
+
+      {items.map((it) => (
+        <section key={it.id} className="rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+          {it.img && (
+            <div className="group relative aspect-[4/3] bg-zinc-100">
+              <img
+                src={it.img}
+                alt={it.q}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-cover will-change-transform transition-transform duration-300 group-hover:scale-[1.01]"
+                onClick={() => setZoom(it)}
+                role="button"
+                aria-label={labels.zoom}
+              />
+              {/* ไล่เฉดช่วยให้อ่านง่าย */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" />
+              {/* ป้ายหัวข้อสั้นบนภาพ */}
+              <div className="absolute left-3 top-3">
+                <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-black/55 backdrop-blur-sm">
+                  {shortLabel(it)}
+                </span>
+              </div>
+              {/* ปุ่มซูม */}
+              <button
+                onClick={() => setZoom(it)}
+                className="absolute right-3 bottom-3 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/85 hover:bg-white text-zinc-800 text-xs border border-zinc-200"
+                aria-label={labels.zoom}
+              >
+                <ZoomIn className="w-3.5 h-3.5" /> {labels.zoom}
+              </button>
+            </div>
+          )}
+
+          <div className="p-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <div className="font-semibold flex-1">{it.q}</div>
+              {it.severity && (
+                <span className={`text-xs px-2 py-0.5 rounded-lg border ${sevTheme[it.severity] || sevTheme.info}`}>
+                  {labels.sev[it.severity] || labels.sev.info}
+                </span>
+              )}
+            </div>
+
+            {it.checks || it.fixes || it.prevent ? (
+              <div className="grid md:grid-cols-3 gap-3">
+                <SectionList icon={Search} title={labels.checks} items={it.checks} />
+                <SectionList icon={Wrench} title={labels.fixes} items={it.fixes} />
+                <SectionList icon={ShieldAlert} title={labels.prevent} items={it.prevent} />
+              </div>
+            ) : (
+              <div className="text-sm text-zinc-700 whitespace-pre-wrap leading-relaxed">{it.a}</div>
+            )}
+          </div>
+        </section>
+      ))}
+
+      {/* Lightbox ดูภาพใหญ่ */}
+      <AnimatePresence>
+        {zoom && (
+          <motion.div
+            className="fixed inset-0 z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-0 bg-black/70" onClick={() => setZoom(null)} />
+            <motion.div
+              className="absolute inset-0 p-4 md:p-8 flex items-center justify-center"
+              initial={{ y: 16, scale: 0.98, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 16, scale: 0.98, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 320, damping: 28 }}
+            >
+              <div className="relative w-full max-w-4xl rounded-3xl bg-white overflow-hidden border border-zinc-200">
+                <button
+                  onClick={() => setZoom(null)}
+                  className="absolute top-3 right-3 z-10 p-2 rounded-xl bg-white/85 border border-zinc-200 hover:bg-zinc-100"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="bg-zinc-100 w-full h-[min(82vh,860px)] flex items-center justify-center">
+                  <img
+                    src={resolveKnowledgeImg(zoom)}
+                    alt={zoom.q}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </article>
   );
 }
 
@@ -1555,12 +2018,15 @@ const resolveKnowledgeImg = (item) =>
   (KNOWLEDGE_IMAGES && item?.id && KNOWLEDGE_IMAGES[item.id]) || item?.img || null;
 
 function Knowledge({ t }) {
-  const items = (t.knowledge || []).map((it, i) => ({
-    id: it.id || `k-${i}`,
-    img: resolveKnowledgeImg(it),
-    fit: it.fit || "contain", // อินโฟกราฟิกส่วนใหญ่ให้ contain ตอนขยาย
-    ...it,
-  }));
+  // โชว์เฉพาะความรู้ทั่วไป (ไม่เอา item ที่ไว้ใช้กับ Troubleshoot)
+  const items = (t.knowledge || [])
+    .filter(it => it?.type !== "troubleshoot")
+    .map((it, i) => ({
+      id: it.id || `k-${i}`,
+      img: resolveKnowledgeImg(it),
+      fit: it.fit || "contain", // อินโฟกราฟิกส่วนใหญ่ให้ contain ตอนขยาย
+      ...it,
+    }));
 
   const [open, setOpen] = React.useState(null);
   const collapsedMaxH = "max-h-40"; // ~6–7 บรรทัดกับ text-sm + leading-relaxed
@@ -1615,7 +2081,7 @@ function Knowledge({ t }) {
             <div className="p-4">
               <div className="font-semibold mb-1">{it.q}</div>
 
-              {/* โหมดสั้น: ตัดความสูง + ทำฟิล์มเฟดด้านล่าง / โหมดขยาย: โชว์เต็ม */}
+              {/* โหมดสั้น/ยาว */}
               <div className="relative">
                 <div
                   className={cx(
