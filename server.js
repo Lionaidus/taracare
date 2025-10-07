@@ -5,7 +5,25 @@ import "dotenv/config";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const app = express();
-app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+
+/* ---------- CORS: รองรับหลายโดเมนผ่าน ENV ----------
+   ตั้ง CORS_ORIGIN เป็นคอมมาเซป เช่น:
+   CORS_ORIGIN=https://taracare.netlify.app,https://taracare.app
+*/
+const allowList = (process.env.CORS_ORIGIN || "*")
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || allowList.includes("*") || allowList.includes(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked for origin ${origin}`));
+    },
+  })
+);
+
 app.use(express.json({ limit: "1mb" }));
 
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
@@ -31,7 +49,7 @@ const model = genAI.getGenerativeModel({
 // ---------- [3] ตัวช่วย ----------
 const TARANTULA_KEYWORDS = [
   "ทารันทูล่า","tarantula","แมงมุม",
-  "Brachypelma","Grammostola","Aphonopelma","Poecilotheria","Avicularia",
+  "brachypelma","grammostola","aphonopelma","poecilotheria","avicularia",
   "ความชื้น","อุณหภูมิ","substrate","ซับสเตรต",
   "อาหาร","จิ้งหรีด","ดูบิอา","dubia",
   "ตู้เลี้ยง","ฟอสซอเรียล","อาร์โบเรียล","เทอเรสเทรียล",
@@ -40,30 +58,45 @@ const TARANTULA_KEYWORDS = [
 
 function isOnTopic(q) {
   const s = String(q || "").toLowerCase();
-  return TARANTULA_KEYWORDS.some(k => s.includes(k.toLowerCase()));
+  return TARANTULA_KEYWORDS.some(k => s.includes(k));
 }
 
 function clampWords(text, minW = 70, maxW = 180) {
   const words = text.trim().split(/\s+/);
-  if (words.length < minW) return text.trim(); // ให้ไปรีทรายแทน
+  if (words.length < minW) return text.trim();
   if (words.length <= maxW) return text.trim();
   return words.slice(0, maxW).join(" ") + " …";
 }
 
-// ---------- [4] เรียกโมเดลแบบ "Structured output" (JSON) ----------
+// ---------- [3.1] rate-limit แบบเบา ๆ กันสแปม ----------
+const hits = new Map(); // ip -> {count, ts}
+const WINDOW_MS = 10_000;
+const MAX_HITS = 10;
+app.use((req, res, next) => {
+  const ip = req.headers["x-forwarded-for"]?.toString().split(",")[0].trim() || req.socket.remoteAddress || "ip";
+  const now = Date.now();
+  const rec = hits.get(ip) || { count: 0, ts: now };
+  if (now - rec.ts > WINDOW_MS) { rec.count = 0; rec.ts = now; }
+  rec.count += 1;
+  hits.set(ip, rec);
+  if (rec.count > MAX_HITS) return res.status(429).json({ error: "Too many requests, please slow down." });
+  next();
+});
+
+// ---------- [4] เรียกโมเดลแบบ Structured output (JSON) ----------
 async function askModelJSON(userMessage) {
   const generationConfig = {
-    temperature: 0.25,              // โฟกัสเนื้อ
+    temperature: 0.25,
     topP: 0.9,
-    maxOutputTokens: 320,           // ~80–160 คำ
+    maxOutputTokens: 320, // ~80–160 คำ
     responseMimeType: "application/json",
     responseSchema: {
       type: "object",
       properties: {
-        topic_ok: { type: "boolean" },       // true = อยู่ในขอบเขตทารันทูล่า
-        style_ok: { type: "boolean" },       // true = ความยาว/รูปแบบพอดี
-        answer:   { type: "string"  },       // เนื้อหาที่จะส่งให้ผู้ใช้
-        notes:    { type: "string"  },       // โน้ตภายใน (ไม่ต้องแสดงก็ได้)
+        topic_ok: { type: "boolean" },
+        style_ok: { type: "boolean" },
+        answer:   { type: "string"  },
+        notes:    { type: "string"  },
       },
       required: ["topic_ok", "answer"]
     },
@@ -78,7 +111,6 @@ async function askModelJSON(userMessage) {
   try {
     return JSON.parse(raw);
   } catch {
-    // เผื่อรุ่น/เวอร์ชันไม่ส่ง JSON กลับมา
     return { topic_ok: true, style_ok: false, answer: raw || "" };
   }
 }
@@ -96,7 +128,7 @@ function buildUserMessage(question) {
 - หลีกเลี่ยงเนื้อหานอกหัวข้อ / เวิ่นเว้อ
 
 ข้อกำหนดด้านเนื้อหา:
-- ให้ค่าช่วงอุณหภูมิ/ความชื้นโดยประมาณ ความถี่การให้อาหาร สิ่งที่ควร/ไม่ควร ถ้าเหมาะสม
+- ให้ค่าช่วงอุณหภูมิ/ความชื้นโดยประมาณ ความถี่ให้อาหาร สิ่งที่ควร/ไม่ควร ถ้าเหมาะสม
 - หลีกเลี่ยงคำแนะนำอันตรายหรือทางการแพทย์
 
 โจทย์ของผู้ใช้:
@@ -118,7 +150,7 @@ app.post("/api/ai", async (req, res) => {
     const prompt = String(req.body?.prompt || "").trim();
     if (!prompt) return res.status(400).json({ error: "empty prompt" });
 
-    // 6.1 กรองนอกเรื่องตั้งแต่ประตู (กันยิงคำทั่วไปเช่น “สวัสดี”)
+    // Hard guard ก่อนเรียกโมเดล
     if (!isOnTopic(prompt)) {
       return res.json({
         text:
@@ -127,10 +159,10 @@ app.post("/api/ai", async (req, res) => {
       });
     }
 
-    // 6.2 เรียกโมเดลรอบแรก (โหมด JSON)
+    // เรียกรอบแรก
     let payload = await askModelJSON(buildUserMessage(prompt));
 
-    // 6.3 ถ้าหลุดขอบเขต ให้ปฏิเสธทันที
+    // ถ้าหลุดหัวข้อ
     if (!payload?.topic_ok) {
       return res.json({
         text:
@@ -139,9 +171,8 @@ app.post("/api/ai", async (req, res) => {
       });
     }
 
-    // 6.4 ถ้ารูปแบบ/ความยาวยังไม่นิ่ง ให้รีทรายสั่ง “แก้ไขให้ตรงเกณฑ์”
+    // ปรับสไตล์/ความยาวถ้าจำเป็น
     let answer = String(payload?.answer || "").trim();
-
     const wordCount = answer ? answer.split(/\s+/).length : 0;
     const styleBad = !payload?.style_ok || wordCount < 70 || wordCount > 190;
 
@@ -162,7 +193,7 @@ ${prompt}
       }
     }
 
-    // 6.5 Soft clamp ความยาวปลายทาง
+    // Soft clamp
     answer = clampWords(answer, 70, 180);
     if (!answer) {
       answer =
@@ -181,7 +212,7 @@ app.get("/api/debug", (_req, res) => {
   res.json({
     model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
     hasSystemPrompt: Boolean(process.env.SYSTEM_PROMPT),
-    corsOrigin: process.env.CORS_ORIGIN || "*",
+    corsOrigin: allowList,
     ts: new Date().toISOString(),
   });
 });
