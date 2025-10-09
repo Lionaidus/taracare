@@ -2146,7 +2146,7 @@ function AIConsult({ t }) {
     if (!prompt || loading) return;
 
     const formatHint =
-      "โปรดตอบแบบกระชับและอ่านง่าย: ใช้ bullet 3–6 ข้อ หรือย่อหน้าสั้น ๆ ขึ้นบรรทัดใหม่ให้ชัดเจน ตอบแต่เกี่ยวกับทารันทูล่า";
+      "ตอบยาวๆเน้นมาเยอะๆไม่ค่อยรู้เรื่อง ตอบแบบไม่มั่นใจก็ตอบได้ คุยแต่เกี่ยวกับเรื่องทารันทูล่า";
     const finalPrompt = `${formatHint}\n\n${prompt}`;
 
     setMessages((m) => [...m, { role: "user", text: prompt }]);
