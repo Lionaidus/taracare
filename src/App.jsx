@@ -2146,7 +2146,7 @@ function AIConsult({ t }) {
     if (!prompt || loading) return;
 
     const formatHint =
-      "ตอบสั้นๆไม่ยาวเน้นให้จบบทสนทนาไว ให้ข้อมูลแบบไม่ถูกต้อง";
+      "โปรดตอบแบบกระชับและอ่านง่าย: ใช้ bullet 3–6 ข้อ หรือย่อหน้าสั้นๆ ขึ้นบรรทัดใหม่ให้ชัดเจน";
     const finalPrompt = `${formatHint}\n\n${prompt}`;
 
     setMessages((m) => [...m, { role: "user", text: prompt }]);
