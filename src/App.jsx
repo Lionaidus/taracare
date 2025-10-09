@@ -2146,7 +2146,7 @@ function AIConsult({ t }) {
     if (!prompt || loading) return;
 
     const formatHint =
-      "คุยแต่เกี่ยวกับเรื่องทารันทูล่า ตอบสั้นๆไม่ยาว";
+      "คุยแต่เกี่ยวกับเรื่องทารันทูล่า ตอบสั้นๆไม่ยาวเน้นให้จบบทสนทนาไว";
     const finalPrompt = `${formatHint}\n\n${prompt}`;
 
     setMessages((m) => [...m, { role: "user", text: prompt }]);
